@@ -7,7 +7,7 @@
         <div class="panel panel--pause">
           <div class="panel-icon">⏸</div>
           <h1>PAUSED</h1>
-          <p class="pause-hint">Press SPACE to continue</p>
+          <p class="pause-hint">Press SPACE or ESC to continue</p>
           <div class="btn-group">
             <button class="btn" @click="resumeGame">RESUME</button>
             <button class="btn" @click="startGame">NEW GAME</button>
@@ -200,7 +200,8 @@ function onKeyDown(event) {
     keyState.shoot = true
   }
 
-  if (event.key === ' ') {
+  const isPauseKey = event.key === ' ' || event.key === 'Escape' || event.key === 'Esc' || event.code === 'Escape'
+  if (isPauseKey) {
     event.preventDefault()
     togglePause()
   }

@@ -19,6 +19,10 @@ import PongCanvas from './components/pong/GameCanvas.vue'
 import InvadersWelcome from './components/invaders/WelcomeScreen.vue'
 import InvadersCanvas from './components/invaders/GameCanvas.vue'
 
+// Neon Blocks components
+import BlocksWelcome from './components/blocks/WelcomeScreen.vue'
+import BlocksCanvas from './components/blocks/GameCanvas.vue'
+
 // screen: 'arcade' | 'brickbreaker' | 'snake'
 const screen = ref('arcade')
 
@@ -52,6 +56,9 @@ const startPong = (mode = 'single') => {
   pongStarted.value = true
 }
 
+// neon blocks state
+const blocksStarted = ref(false)
+
 // navigate back to arcade menu
 const goToArcade = () => {
   screen.value = 'arcade'
@@ -59,6 +66,7 @@ const goToArcade = () => {
   snakeStarted.value = false
   pongStarted.value = false
   invadersStarted.value = false
+  blocksStarted.value = false
   pongMode.value = 'single'
   invadersMode.value = 'classic'
 }
@@ -72,6 +80,7 @@ const goToArcade = () => {
     @play-snake="screen = 'snake'"
     @play-pong="screen = 'pong'"
     @play-invaders="screen = 'invaders'"
+    @play-blocks="screen = 'blocks'"
   />
 
   <!-- BRICK BREAKER -->
@@ -133,6 +142,19 @@ const goToArcade = () => {
       :key="`invaders-${invadersMode}`"
       :mode="invadersMode"
       @menu="invadersStarted = false"
+    />
+  </template>
+
+  <!-- NEON BLOCKS -->
+  <template v-else-if="screen === 'blocks'">
+    <BlocksWelcome
+      v-if="!blocksStarted"
+      @start="blocksStarted = true"
+      @back="goToArcade"
+    />
+    <BlocksCanvas
+      v-else
+      @menu="blocksStarted = false"
     />
   </template>
 </template>

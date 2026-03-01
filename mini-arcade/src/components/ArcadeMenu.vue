@@ -125,20 +125,38 @@
           </div>
         </button>
 
-        <!-- Under Construction -->
-        <button class="game-card game-card--disabled" type="button" disabled>
+        <!-- Neon Blocks -->
+        <button class="game-card" @click="$emit('play-blocks')">
           <div class="card-glow glow-orange"></div>
           <div class="card-screen">
-            <div class="mini-preview construction-preview">
-              <div class="construction-icon">🚧</div>
-              <div class="construction-text">UNDER CONSTRUCTION</div>
+            <div class="mini-preview blocks-preview">
+              <div class="blocks-bg-grid"></div>
+
+              <div class="blocks-pattern">
+                <span class="blocks-base-cell blocks-base-cell--y1"></span>
+                <span class="blocks-base-cell blocks-base-cell--y2"></span>
+                <span class="blocks-base-cell blocks-base-cell--y3"></span>
+                <span class="blocks-base-cell blocks-base-cell--y4"></span>
+
+                <span class="blocks-base-cell blocks-base-cell--x1"></span>
+                <span class="blocks-base-cell blocks-base-cell--x2"></span>
+                <span class="blocks-base-cell blocks-base-cell--x3"></span>
+                <span class="blocks-base-cell blocks-base-cell--x4"></span>
+              </div>
+
+              <div class="blocks-falling-v">
+                <span class="blocks-v-cell blocks-v-cell--1"></span>
+                <span class="blocks-v-cell blocks-v-cell--2"></span>
+                <span class="blocks-v-cell blocks-v-cell--3"></span>
+                <span class="blocks-v-cell blocks-v-cell--4"></span>
+              </div>
             </div>
           </div>
           <div class="card-info">
             <div class="card-number">05</div>
-            <div class="card-title">UNDER<br>CONSTRUCTION</div>
-            <div class="card-desc">Coming soon...</div>
-            <div class="press-start">UNDER CONSTRUCTION</div>
+            <div class="card-title">NEON<br><span class="card-title-accent">BLOCKS</span></div>
+            <div class="card-desc">Cluster puzzle chaos</div>
+            <div class="press-start">PRESS START ▶</div>
           </div>
         </button>
       </div>
@@ -150,7 +168,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
 
-defineEmits(['play-brickbreaker', 'play-snake', 'play-pong', 'play-invaders'])
+defineEmits(['play-brickbreaker', 'play-snake', 'play-pong', 'play-invaders', 'play-blocks'])
 
 const snakeCells = [
   { x: 2, y: 4, type: 'head' },

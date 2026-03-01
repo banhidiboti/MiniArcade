@@ -465,6 +465,78 @@
   gap: 12px;
 }
 
+.blocks-preview {
+  position: relative;
+  width: 122px;
+  height: 100px;
+  border: 1px solid rgba(0, 240, 255, 0.24);
+  background: linear-gradient(to bottom, rgba(2, 22, 50, 0.76), rgba(2, 16, 38, 0.95));
+  overflow: hidden;
+}
+
+.blocks-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 180, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 180, 255, 0.07) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.blocks-pattern {
+  position: absolute;
+  inset: 0;
+}
+
+.blocks-base-cell,
+.blocks-v-cell {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  box-shadow: 0 0 9px currentColor;
+}
+
+
+/* y blocks (purple) */
+.blocks-base-cell--y1 { left: 41px; top: 34px; color: #bb66ff; background: #bb66ff; }
+.blocks-base-cell--y2 { left: 41px; top: 48px; color: #bb66ff; background: #bb66ff; }
+.blocks-base-cell--y3 { left: 55px; top: 48px; color: #bb66ff; background: #bb66ff; }
+.blocks-base-cell--y4 { left: 41px; top: 62px; color: #bb66ff; background: #bb66ff; }
+
+/* x blocks (orange) */
+.blocks-base-cell--x1 { left: 55px; top: 62px; color: #ff7733; background: #ff7733; }
+.blocks-base-cell--x2 { left: 41px; top: 76px; color: #ff7733; background: #ff7733; }
+.blocks-base-cell--x3 { left: 55px; top: 76px; color: #ff7733; background: #ff7733; }
+.blocks-base-cell--x4 { left: 69px; top: 76px; color: #ff7733; background: #ff7733; }
+
+.blocks-falling-v {
+  position: absolute;
+  left: 55px;
+  top: 6px;
+  width: 26px;
+  height: 40px;
+  animation: blocksVDrop 2.2s cubic-bezier(0.24, 0.7, 0.25, 1) infinite;
+}
+
+.blocks-v-cell {
+  color: #44ff88;
+  background: #44ff88;
+}
+
+.blocks-v-cell--1 { left: 0; top: 0; }
+.blocks-v-cell--2 { left: 14px; top: 0; }
+.blocks-v-cell--3 { left: 14px; top: 14px; }
+.blocks-v-cell--4 { left: 14px; top: 28px; }
+
+@keyframes blocksVDrop {
+  0%   { transform: translateY(-16px); opacity: 0; }
+  10%  { opacity: 1; }
+  58%  { transform: translateY(28px); opacity: 1; }
+  70%  { transform: translateY(28px); opacity: 1; }
+  100% { transform: translateY(28px); opacity: 0; }
+}
+
 .invaders-preview {
   position: relative;
   width: 122px;
