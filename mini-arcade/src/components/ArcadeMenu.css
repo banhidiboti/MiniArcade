@@ -204,6 +204,24 @@
   width: 100%;
 }
 
+@media (min-width: 981px) {
+  .game-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .game-grid > .game-card {
+    grid-column: span 2;
+  }
+
+  .game-grid > .game-card:nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+
+  .game-grid > .game-card:nth-child(5) {
+    grid-column: 4 / span 2;
+  }
+}
+
 @media (max-width: 980px) {
   .game-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -360,6 +378,81 @@
   position: relative;
   width: 112px;
   height: 98px;
+}
+
+.pong-preview {
+  position: relative;
+  width: 122px;
+  height: 100px;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  background: rgba(2, 20, 48, 0.55);
+  overflow: hidden;
+}
+
+.pong-center-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 240, 255, 0.68) 0px,
+    rgba(0, 240, 255, 0.68) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  opacity: 0.75;
+}
+
+.pong-paddle {
+  position: absolute;
+  width: 6px;
+  height: 24px;
+  top: 38px;
+  border-radius: 2px;
+}
+
+.pong-paddle--left {
+  left: 10px;
+  background: #00f0ff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+  animation: pongLeftPaddle 1.35s ease-in-out infinite alternate;
+}
+
+.pong-paddle--right {
+  right: 10px;
+  background: #ff6ad5;
+  box-shadow: 0 0 8px rgba(255, 106, 213, 0.8);
+  animation: pongRightPaddle 1.2s ease-in-out infinite alternate;
+}
+
+.pong-ball {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  left: 58px;
+  top: 46px;
+  background: #ffe600;
+  box-shadow: 0 0 8px rgba(255, 230, 0, 0.95);
+  animation: pongBallGlide 1.25s ease-in-out infinite alternate;
+}
+
+@keyframes pongLeftPaddle {
+  from { transform: translateY(-17px); }
+  to   { transform: translateY(17px); }
+}
+
+@keyframes pongRightPaddle {
+  from { transform: translateY(14px); }
+  to   { transform: translateY(-14px); }
+}
+
+@keyframes pongBallGlide {
+  from { transform: translate(16px, 5px); }
+  to   { transform: translate(-16px, -9px); }
 }
 
 .construction-preview {

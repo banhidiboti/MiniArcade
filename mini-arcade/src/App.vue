@@ -11,6 +11,10 @@ import BrickCanvasEndless from './components/brickbreaker/GameCanvasEndless.vue'
 import SnakeWelcome from './components/snake/WelcomeScreen.vue'
 import SnakeCanvas from './components/snake/GameCanvas.vue'
 
+// Pong components
+import PongWelcome from './components/pong/WelcomeScreen.vue'
+import PongCanvas from './components/pong/GameCanvas.vue'
+
 // screen: 'arcade' | 'brickbreaker' | 'snake'
 const screen = ref('arcade')
 
@@ -26,11 +30,22 @@ const startBrick = (mode = 'classic') => {
 // snake state
 const snakeStarted = ref(false)
 
+// pong state
+const pongStarted = ref(false)
+const pongMode = ref('single')
+
+const startPong = (mode = 'single') => {
+  pongMode.value = mode
+  pongStarted.value = true
+}
+
 // navigate back to arcade menu
 const goToArcade = () => {
   screen.value = 'arcade'
   brickStarted.value = false
   snakeStarted.value = false
+  pongStarted.value = false
+  pongMode.value = 'single'
 }
 </script>
 
@@ -40,6 +55,7 @@ const goToArcade = () => {
     v-if="screen === 'arcade'"
     @play-brickbreaker="screen = 'brickbreaker'"
     @play-snake="screen = 'snake'"
+    @play-pong="screen = 'pong'"
   />
 
   <!-- BRICK BREAKER -->
@@ -71,6 +87,21 @@ const goToArcade = () => {
     <SnakeCanvas
       v-else
       @menu="snakeStarted = false"
+    />
+  </template>
+
+  <!-- PONG -->
+  <template v-else-if="screen === 'pong'">
+    <PongWelcome
+      v-if="!pongStarted"
+      @start="startPong"
+      @back="goToArcade"
+    />
+    <PongCanvas
+      v-else
+      :key="`pong-${pongMode}`"
+      :mode="pongMode"
+      @menu="pongStarted = false"
     />
   </template>
 </template>

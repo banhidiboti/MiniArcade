@@ -81,6 +81,25 @@
           </div>
         </button>
 
+        <!-- Pong -->
+        <button class="game-card" @click="$emit('play-pong')">
+          <div class="card-glow glow-orange"></div>
+          <div class="card-screen">
+            <div class="mini-preview pong-preview">
+              <div class="pong-center-line"></div>
+              <div class="pong-paddle pong-paddle--left"></div>
+              <div class="pong-paddle pong-paddle--right"></div>
+              <div class="pong-ball"></div>
+            </div>
+          </div>
+          <div class="card-info">
+            <div class="card-number">03</div>
+            <div class="card-title">NEON<br><span class="card-title-accent">PONG</span></div>
+            <div class="card-desc">Classic arcade duel</div>
+            <div class="press-start">PRESS START ▶</div>
+          </div>
+        </button>
+
         <!-- Under Construction -->
         <button class="game-card game-card--disabled" type="button" disabled>
           <div class="card-glow glow-orange"></div>
@@ -91,7 +110,24 @@
             </div>
           </div>
           <div class="card-info">
-            <div class="card-number">03</div>
+            <div class="card-number">04</div>
+            <div class="card-title">UNDER<br>CONSTRUCTION</div>
+            <div class="card-desc">Coming soon...</div>
+            <div class="press-start">UNDER CONSTRUCTION</div>
+          </div>
+        </button>
+
+        <!-- Under Construction -->
+        <button class="game-card game-card--disabled" type="button" disabled>
+          <div class="card-glow glow-orange"></div>
+          <div class="card-screen">
+            <div class="mini-preview construction-preview">
+              <div class="construction-icon">🚧</div>
+              <div class="construction-text">UNDER CONSTRUCTION</div>
+            </div>
+          </div>
+          <div class="card-info">
+            <div class="card-number">05</div>
             <div class="card-title">UNDER<br>CONSTRUCTION</div>
             <div class="card-desc">Coming soon...</div>
             <div class="press-start">UNDER CONSTRUCTION</div>
@@ -106,7 +142,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
 
-defineEmits(['play-brickbreaker', 'play-snake'])
+defineEmits(['play-brickbreaker', 'play-snake', 'play-pong'])
 
 const snakeCells = [
   { x: 2, y: 4, type: 'head' },
