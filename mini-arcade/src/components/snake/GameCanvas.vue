@@ -50,6 +50,7 @@ const HUD_H     = 52
 const COLS      = 25
 const ROWS      = 25
 const MIN_CELL  = 12
+const VIEWPORT_FILL = 0.88
 
 const BASE_MS   = 150
 const MIN_MS    = 60
@@ -70,7 +71,7 @@ let CH = HUD_H + CELL * ROWS
 function computeSize() {
   const nextCell = Math.max(
     MIN_CELL,
-    Math.floor(Math.min(window.innerWidth / COLS, (window.innerHeight - HUD_H) / ROWS))
+    Math.floor(Math.min((window.innerWidth * VIEWPORT_FILL) / COLS, ((window.innerHeight - HUD_H) * VIEWPORT_FILL) / ROWS))
   )
 
   CELL = nextCell

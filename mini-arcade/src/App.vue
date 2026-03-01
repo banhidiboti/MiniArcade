@@ -15,6 +15,10 @@ import SnakeCanvas from './components/snake/GameCanvas.vue'
 import PongWelcome from './components/pong/WelcomeScreen.vue'
 import PongCanvas from './components/pong/GameCanvas.vue'
 
+// Cosmic Invaders components
+import InvadersWelcome from './components/invaders/WelcomeScreen.vue'
+import InvadersCanvas from './components/invaders/GameCanvas.vue'
+
 // screen: 'arcade' | 'brickbreaker' | 'snake'
 const screen = ref('arcade')
 
@@ -34,6 +38,15 @@ const snakeStarted = ref(false)
 const pongStarted = ref(false)
 const pongMode = ref('single')
 
+// invaders state
+const invadersStarted = ref(false)
+const invadersMode = ref('classic')
+
+const startInvaders = (mode = 'classic') => {
+  invadersMode.value = mode
+  invadersStarted.value = true
+}
+
 const startPong = (mode = 'single') => {
   pongMode.value = mode
   pongStarted.value = true
@@ -45,7 +58,9 @@ const goToArcade = () => {
   brickStarted.value = false
   snakeStarted.value = false
   pongStarted.value = false
+  invadersStarted.value = false
   pongMode.value = 'single'
+  invadersMode.value = 'classic'
 }
 </script>
 
@@ -56,6 +71,7 @@ const goToArcade = () => {
     @play-brickbreaker="screen = 'brickbreaker'"
     @play-snake="screen = 'snake'"
     @play-pong="screen = 'pong'"
+    @play-invaders="screen = 'invaders'"
   />
 
   <!-- BRICK BREAKER -->
@@ -102,6 +118,21 @@ const goToArcade = () => {
       :key="`pong-${pongMode}`"
       :mode="pongMode"
       @menu="pongStarted = false"
+    />
+  </template>
+
+  <!-- COSMIC INVADERS -->
+  <template v-else-if="screen === 'invaders'">
+    <InvadersWelcome
+      v-if="!invadersStarted"
+      @start="startInvaders"
+      @back="goToArcade"
+    />
+    <InvadersCanvas
+      v-else
+      :key="`invaders-${invadersMode}`"
+      :mode="invadersMode"
+      @menu="invadersStarted = false"
     />
   </template>
 </template>

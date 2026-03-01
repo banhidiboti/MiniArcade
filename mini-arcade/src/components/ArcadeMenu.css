@@ -465,6 +465,158 @@
   gap: 12px;
 }
 
+.invaders-preview {
+  position: relative;
+  width: 122px;
+  height: 100px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 240, 255, 0.24);
+  background:
+    linear-gradient(to bottom, rgba(2, 24, 56, 0.75), rgba(2, 16, 38, 0.92)),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 120, 255, 0.08) 0px,
+      rgba(0, 120, 255, 0.08) 1px,
+      transparent 1px,
+      transparent 14px
+    );
+}
+
+.invaders-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(168, 247, 255, 0.75) 0 1px, transparent 2px),
+    radial-gradient(circle at 28% 62%, rgba(168, 247, 255, 0.55) 0 1px, transparent 2px),
+    radial-gradient(circle at 58% 18%, rgba(168, 247, 255, 0.65) 0 1px, transparent 2px),
+    radial-gradient(circle at 76% 36%, rgba(168, 247, 255, 0.58) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 72%, rgba(168, 247, 255, 0.62) 0 1px, transparent 2px);
+  animation: invaderStarsTwinkle 2.2s ease-in-out infinite alternate;
+}
+
+.invaders-row {
+  position: absolute;
+  left: 9px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  animation: miniInvadersMarch 1.15s steps(2, end) infinite alternate;
+}
+
+.invaders-row--a { top: 22px; }
+.invaders-row--b { top: 40px; animation-delay: 0.2s; }
+
+.invader-sprite {
+  position: relative;
+  width: 14px;
+  height: 9px;
+  transform-origin: center;
+  animation: invaderWobble 0.7s steps(2, end) infinite;
+}
+
+.invader-sprite::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 2px;
+  box-shadow:
+    2px 0 currentColor,
+    8px 0 currentColor,
+    10px 0 currentColor,
+    0 2px currentColor,
+    2px 2px currentColor,
+    4px 2px currentColor,
+    6px 2px currentColor,
+    8px 2px currentColor,
+    10px 2px currentColor,
+    12px 2px currentColor,
+    0 4px currentColor,
+    4px 4px currentColor,
+    6px 4px currentColor,
+    12px 4px currentColor,
+    2px 6px currentColor,
+    10px 6px currentColor;
+}
+
+.invader-sprite--pink {
+  color: #ff6ad5;
+  filter: drop-shadow(0 0 4px rgba(255, 106, 213, 0.8));
+}
+
+.invader-sprite--green {
+  color: #39ff88;
+  filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.8));
+}
+
+.invaders-player {
+  position: absolute;
+  bottom: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 12px;
+  background: #00f0ff;
+  clip-path: polygon(50% 0%, 68% 22%, 88% 45%, 100% 100%, 0% 100%, 12% 45%, 32% 22%);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.92);
+  animation: miniCannonNudge 1.4s ease-in-out infinite alternate;
+}
+
+.invaders-shot {
+  position: absolute;
+  width: 2px;
+  height: 18px;
+}
+
+.invaders-shot--player {
+  bottom: 24px;
+  left: 60px;
+  background: #ffe600;
+  box-shadow: 0 0 8px rgba(255, 230, 0, 0.9);
+  animation: miniPlayerShot 0.85s linear infinite;
+}
+
+.invaders-shot--enemy {
+  top: 34px;
+  left: 86px;
+  background: #ff6b6b;
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.85);
+  animation: miniEnemyShot 0.9s linear infinite;
+}
+
+@keyframes miniInvadersMarch {
+  from { transform: translateX(-4px); }
+  to { transform: translateX(6px); }
+}
+
+@keyframes miniCannonNudge {
+  from { transform: translateX(calc(-50% - 8px)); }
+  to { transform: translateX(calc(-50% + 8px)); }
+}
+
+@keyframes miniPlayerShot {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(-38px); opacity: 0; }
+}
+
+@keyframes miniEnemyShot {
+  0% { transform: translateY(0); opacity: 0; }
+  12% { opacity: 1; }
+  100% { transform: translateY(30px); opacity: 0; }
+}
+
+@keyframes invaderWobble {
+  from { transform: translateY(-1px); }
+  to { transform: translateY(1px); }
+}
+
+@keyframes invaderStarsTwinkle {
+  from { opacity: 0.65; }
+  to { opacity: 1; }
+}
+
 .construction-icon {
   font-size: 24px;
   filter: drop-shadow(0 0 8px #ff9f43aa);

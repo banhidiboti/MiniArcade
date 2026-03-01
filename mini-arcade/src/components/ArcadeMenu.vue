@@ -100,20 +100,28 @@
           </div>
         </button>
 
-        <!-- Under Construction -->
-        <button class="game-card game-card--disabled" type="button" disabled>
+        <!-- Cosmic Invaders -->
+        <button class="game-card" @click="$emit('play-invaders')">
           <div class="card-glow glow-orange"></div>
           <div class="card-screen">
-            <div class="mini-preview construction-preview">
-              <div class="construction-icon">🚧</div>
-              <div class="construction-text">UNDER CONSTRUCTION</div>
+            <div class="mini-preview invaders-preview">
+              <div class="invaders-stars"></div>
+              <div class="invaders-row invaders-row--a">
+                <span v-for="i in 5" :key="`ia-${i}`" class="invader-sprite invader-sprite--pink"></span>
+              </div>
+              <div class="invaders-row invaders-row--b">
+                <span v-for="i in 5" :key="`ib-${i}`" class="invader-sprite invader-sprite--green"></span>
+              </div>
+              <div class="invaders-player"></div>
+              <div class="invaders-shot invaders-shot--player"></div>
+              <div class="invaders-shot invaders-shot--enemy"></div>
             </div>
           </div>
           <div class="card-info">
             <div class="card-number">04</div>
-            <div class="card-title">UNDER<br>CONSTRUCTION</div>
-            <div class="card-desc">Coming soon...</div>
-            <div class="press-start">UNDER CONSTRUCTION</div>
+            <div class="card-title">COSMIC<br><span class="card-title-accent">INVADERS</span></div>
+            <div class="card-desc">Defend the galaxy</div>
+            <div class="press-start">PRESS START ▶</div>
           </div>
         </button>
 
@@ -142,7 +150,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
 
-defineEmits(['play-brickbreaker', 'play-snake', 'play-pong'])
+defineEmits(['play-brickbreaker', 'play-snake', 'play-pong', 'play-invaders'])
 
 const snakeCells = [
   { x: 2, y: 4, type: 'head' },
