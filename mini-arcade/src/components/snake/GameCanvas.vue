@@ -28,7 +28,7 @@
             <div class="panel-icon">💀</div>
             <h1>GAME OVER</h1>
             <p class="final-score-label">SCORE</p>
-            <p class="final-score">{{ pad(score) }}</p>
+            <p class="final-score">{{ score }}</p>
             <div class="btn-group">
               <button class="btn" @click="startGame">PLAY AGAIN</button>
               <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -52,9 +52,9 @@ const ROWS      = 25
 const MIN_CELL  = 12
 const VIEWPORT_FILL = 0.88
 
-const BASE_MS   = 150
-const MIN_MS    = 60
-const STEP_MS   = 15
+const BASE_MS   = 130
+const MIN_MS    = 52
+const STEP_MS   = 12
 const FOODS_LVL = 5
 
 const FOOD_TYPES = [
@@ -95,6 +95,7 @@ const highScore = ref(0)  // no persistence
 
 // ── Game vars ──────────────────────────────────────────────────────────────
 let snake      = [{ x: 12, y: 12 }]
+let prevSnake  = [{ x: 12, y: 12 }]
 let dir        = { x: 1, y: 0 }
 let nextDir    = { x: 1, y: 0 }
 let food       = null
@@ -102,12 +103,12 @@ let particles  = []
 let eatCount   = 0
 let level      = 1
 let intervalMs = BASE_MS
-let loopTimer  = null
 let frameId    = null
+let lastFrameTs = 0
+let tickAccumulator = 0
+let turnQueue = []
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-function pad(n) { return String(n) }
-
 function pickFood() {
   const r = Math.random()
   let acc = 0
@@ -145,6 +146,11 @@ function spawnParticles(gx, gy, color) {
 // ── Game logic ─────────────────────────────────────────────────────────────
 function tick() {
   if (gameState.value !== 'running') return
+  if (turnQueue.length) {
+    nextDir = turnQueue.shift()
+  }
+
+  prevSnake = snake.map((seg) => ({ ...seg }))
   dir = { ...nextDir }
   const head = {
     x: snake[0].x + dir.x,
@@ -164,21 +170,15 @@ function tick() {
     if (newLevel > level) {
       level = newLevel
       intervalMs = Math.max(MIN_MS, BASE_MS - (level - 1) * STEP_MS)
-      restartLoop()
     }
   } else {
     snake = snake.slice(0, -1)
   }
 }
 
-function restartLoop() {
-  clearInterval(loopTimer)
-  loopTimer = setInterval(tick, intervalMs)
-}
-
 function endGame() {
   gameState.value = 'gameover'
-  clearInterval(loopTimer)
+  tickAccumulator = 0
   if (score.value > highScore.value) {
     highScore.value = score.value
   }
@@ -187,6 +187,7 @@ function endGame() {
 // ── Controls ───────────────────────────────────────────────────────────────
 function startGame() {
   snake        = [{ x: 12, y: 12 }]
+  prevSnake    = [{ x: 12, y: 12 }]
   dir          = { x: 1, y: 0 }
   nextDir      = { x: 1, y: 0 }
   score.value  = 0
@@ -194,13 +195,15 @@ function startGame() {
   level        = 1
   intervalMs   = BASE_MS
   particles    = []
+  turnQueue    = []
+  tickAccumulator = 0
+  lastFrameTs = 0
   spawnFood()
   gameState.value = 'running'
-  restartLoop()
 }
 
-function pause()       { if (gameState.value === 'running') { gameState.value = 'paused';  clearInterval(loopTimer) } }
-function resume()      { if (gameState.value === 'paused')  { gameState.value = 'running'; restartLoop() } }
+function pause()       { if (gameState.value === 'running') { gameState.value = 'paused'; tickAccumulator = 0 } }
+function resume()      { if (gameState.value === 'paused')  { gameState.value = 'running'; lastFrameTs = 0 } }
 function togglePause() { gameState.value === 'running' ? pause() : resume() }
 
 const KEY_MAP = {
@@ -210,22 +213,51 @@ const KEY_MAP = {
   ArrowRight: { x:  1, y: 0 }, d: { x:  1, y: 0 }, D: { x:  1, y: 0 },
 }
 
+function isSameDir(a, b) {
+  return a.x === b.x && a.y === b.y
+}
+
+function isReverseDir(a, b) {
+  return a.x === -b.x && a.y === -b.y
+}
+
 function onKey(e) {
   if (KEY_MAP[e.key]) {
     e.preventDefault()
     const nd = KEY_MAP[e.key]
-    if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd
+    const lastQueued = turnQueue.length ? turnQueue[turnQueue.length - 1] : nextDir
+    if (isSameDir(nd, lastQueued)) return
+    if (isReverseDir(nd, lastQueued)) return
+    if (turnQueue.length < 2) turnQueue.push(nd)
   }
   if (e.key === ' ' || e.key === 'Escape') { e.preventDefault(); togglePause() }
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
-function render() {
+function render(timestamp) {
   frameId = requestAnimationFrame(render)
   const canvas = canvasRef.value
   if (!canvas) return
   if (!CELL) return
   const ctx = canvas.getContext('2d')
+
+  if (!lastFrameTs) lastFrameTs = timestamp
+  const frameDelta = Math.min(timestamp - lastFrameTs, 120)
+  lastFrameTs = timestamp
+
+  if (gameState.value === 'running') {
+    tickAccumulator += frameDelta
+    while (tickAccumulator >= intervalMs) {
+      tick()
+      tickAccumulator -= intervalMs
+      if (gameState.value !== 'running') {
+        tickAccumulator = 0
+        break
+      }
+    }
+  }
+
+  const moveAlpha = gameState.value === 'running' ? Math.min(1, tickAccumulator / intervalMs) : 1
 
   // Update particles & food
   particles = particles.filter(p => p.life > 0).map(p => ({
@@ -288,7 +320,7 @@ function render() {
   // reset shadow after food glow
   ctx.shadowBlur  = 0
   ctx.shadowColor = 'transparent'
-  drawSnake(ctx)
+  drawSnake(ctx, moveAlpha)
   // reset shadow after snake glow
   ctx.shadowBlur  = 0
   ctx.shadowColor = 'transparent'
@@ -345,14 +377,19 @@ function drawFood(ctx) {
   ctx.restore()
 }
 
-function drawSnake(ctx) {
+function drawSnake(ctx, moveAlpha = 1) {
   snake.forEach((seg, i) => {
+    const prevTail = prevSnake[prevSnake.length - 1] || seg
+    const from = prevSnake[i] || prevTail
+    const ix = from.x + (seg.x - from.x) * moveAlpha
+    const iy = from.y + (seg.y - from.y) * moveAlpha
+
     const isHead = i === 0
     const t      = 1 - i / snake.length
     const alpha  = 0.2 + t * 0.8
     const pad2   = 2
-    const x      = seg.x * CELL + pad2
-    const y      = HUD_H + seg.y * CELL + pad2
+    const x      = ix * CELL + pad2
+    const y      = HUD_H + iy * CELL + pad2
     const size   = CELL - pad2 * 2
 
     ctx.save()
@@ -423,7 +460,6 @@ onUnmounted(() => {
   window.removeEventListener('keydown', onKey)
   window.removeEventListener('resize', onResize)
   cancelAnimationFrame(frameId)
-  clearInterval(loopTimer)
 })
 </script>
 

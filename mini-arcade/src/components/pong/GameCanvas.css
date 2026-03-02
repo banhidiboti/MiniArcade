@@ -94,12 +94,18 @@
   box-shadow: 0 0 40px rgba(255, 60, 80, 0.3);
 }
 
+.panel--win {
+  border-color: #ffcc00;
+  box-shadow: 0 0 40px rgba(255, 200, 0, 0.3);
+}
+
 .panel--pause {
   border-color: #44aaff;
   box-shadow: 0 0 40px rgba(68, 170, 255, 0.3);
 }
 
 .panel--pause h1 { color: #44aaff; }
+.panel--win h1   { color: #ffcc00; }
 .panel--lose h1  { color: #ff4466; }
 
 /* ── Panel icon ── */

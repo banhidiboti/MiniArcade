@@ -40,8 +40,9 @@ const HEIGHT = 640
 const HUD_HEIGHT = 42
 const HUD_PAUSE_BREAKPOINT = 900
 
-// Scale factor: fit the game into the window while keeping aspect ratio
-const scale = ref(1)
+// View-fit size in CSS pixels (logic still runs at WIDTH x HEIGHT)
+const displayWidth = ref(WIDTH)
+const displayHeight = ref(HEIGHT)
 const showHudPause = ref(false)
 let draggingPaddle = false
 let activePointerId = null
@@ -49,7 +50,9 @@ let activePointerId = null
 const updateScale = () => {
   const scaleX = window.innerWidth / WIDTH
   const scaleY = window.innerHeight / HEIGHT
-  scale.value = Math.min(scaleX, scaleY)
+  const fitScale = Math.min(scaleX, scaleY)
+  displayWidth.value = Math.max(1, Math.floor(WIDTH * fitScale))
+  displayHeight.value = Math.max(1, Math.floor(HEIGHT * fitScale))
   showHudPause.value = window.innerWidth <= HUD_PAUSE_BREAKPOINT
 }
 
@@ -598,16 +601,15 @@ onUnmounted(() => {
     <div
       class="canvas-wrapper"
       :style="{
-        width: '480px',
-        height: '640px',
-        transform: `scale(${scale})`,
-        transformOrigin: 'center center',
+        width: `${displayWidth}px`,
+        height: `${displayHeight}px`,
       }"
     >
       <canvas
         ref="canvas"
         :width="480"
         :height="640"
+        :style="{ width: `${displayWidth}px`, height: `${displayHeight}px` }"
         @pointerdown="onPointerDown"
         @pointermove="onPointerMove"
         @pointerup="onPointerUp"

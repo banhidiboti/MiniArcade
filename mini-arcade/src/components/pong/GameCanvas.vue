@@ -24,9 +24,9 @@
       <!-- Game Over overlay -->
       <Transition name="fade">
         <div v-if="gameState === 'gameover'" class="overlay">
-          <div class="panel panel--lose">
-            <div class="panel-icon">💀</div>
-            <h1>GAME OVER</h1>
+          <div class="panel" :class="isVersusAi && winnerText === 'PLAYER 1' ? 'panel--win' : 'panel--lose'">
+            <div class="panel-icon">{{ isVersusAi && winnerText === 'PLAYER 1' ? '🏆' : '💀' }}</div>
+            <h1>{{ isVersusAi && winnerText === 'PLAYER 1' ? 'YOU WIN!' : 'GAME OVER' }}</h1>
             <p class="final-score-label">WINNER</p>
             <p class="final-score">{{ winnerText }}</p>
             <p class="final-score-label">FINAL SCORE</p>

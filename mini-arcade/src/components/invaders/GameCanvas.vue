@@ -67,11 +67,8 @@ const score = ref(0)
 const lives = ref(3)
 const wave = ref(1)
 const canvasRef = ref(null)
-const finalScore = computed(() => {
-  if (isEndless.value) return score.value
-  const multiplier = lives.value >= 2 ? lives.value : 1
-  return score.value * multiplier
-})
+const finalScore = ref(0)
+const isScoreFinalized = ref(false)
 
 const player = {
   x: WIDTH / 2 - 28,
@@ -163,6 +160,8 @@ function resetRoundVariables() {
 function startGame() {
   state.value = 'running'
   score.value = 0
+  finalScore.value = 0
+  isScoreFinalized.value = false
   lives.value = 3
   wave.value = 1
   resetRoundVariables()
@@ -170,9 +169,17 @@ function startGame() {
 
 function startNextWave() {
   state.value = 'running'
+  isScoreFinalized.value = false
   wave.value += 1
   lives.value = Math.min(3, lives.value + 1)
   resetRoundVariables()
+}
+
+function finalizeScore() {
+  if (isScoreFinalized.value) return
+  if (isEndless.value) finalScore.value = score.value
+  else finalScore.value = score.value * Math.max(0, lives.value)
+  isScoreFinalized.value = true
 }
 
 function resumeGame() {
@@ -290,7 +297,10 @@ function updateAliens(dt) {
   const alive = aliens.filter((alien) => alien.alive)
   if (!alive.length) {
     if (isEndless.value) startNextWave()
-    else state.value = 'won'
+    else {
+      finalizeScore()
+      state.value = 'won'
+    }
     return
   }
 
@@ -307,6 +317,7 @@ function updateAliens(dt) {
   for (const alien of alive) {
     if (alien.y + alienLayout.height >= player.y) {
       lives.value = 0
+      finalizeScore()
       state.value = 'gameover'
       return
     }
@@ -376,6 +387,7 @@ function handleCollisions() {
     spawnParticles(player.x + player.width / 2, player.y + player.height / 2, '#ff6b6b')
 
     if (lives.value <= 0) {
+      finalizeScore()
       state.value = 'gameover'
       return
     }
