@@ -1,90 +1,163 @@
 # Mini Arcade
 
-A retro-style arcade built with Vue 3 and Vite. This project includes multiple neon-themed mini-games with a shared arcade menu.
+Neon stílusú, többjátékos mini-arcade gyűjtemény Vue 3 + Vite alapon.
 
-## Games Included
+## Tartalom
 
-### 1) Brick Breaker
-- Modes:
-	- **Classic**: clear all bricks to win.
-	- **Endless**: cleared rows respawn, and the game continues until you lose all lives.
-- Controls:
-	- `A` / `←` = move paddle left
-	- `D` / `→` = move paddle right
-	- `Space` or `Esc` = pause / resume
-- Extra mechanics:
-	- White-outlined bonus bricks can spawn extra balls.
-	- You start with 3 lives.
+- Brick Breaker (Classic + Endless)
+- Cyber Snake
+- Neon Pong (1P + 1v1)
+- Cosmic Invaders (Classic + Endless)
+- Neon Blocks (pentomino alapú, 15×23 pálya)
 
-### 2) Cyber Snake
-- Objective: eat food, grow your snake, and avoid collisions.
-- Controls:
-	- `W` / `↑` = up
-	- `A` / `←` = left
-	- `S` / `↓` = down
-	- `D` / `→` = right
-	- `Space` or `Esc` = pause / resume
-- Extra mechanics:
-	- Speed increases every 5 foods.
-	- Food has different score values (5, 10, 20 points).
+## Tech stack
 
-## Tech Stack
 - Vue 3 (Composition API)
 - Vite
-- Plain CSS (component-scoped and global styles)
+- Canvas alapú renderelés (játéklogika és animáció)
+- Sima CSS (komponensenkénti stílusok)
 
-## Project Structure
+## Telepítés és futtatás
 
+### 1) Függőségek telepítése
+
+```bash
+npm install
 ```
+
+### 2) Fejlesztői futtatás
+
+Jelenleg nincs külön `dev` script, ezért Vite közvetlenül:
+
+```bash
+npx vite
+```
+
+### 3) Build
+
+```bash
+npm run build
+```
+
+### 4) Deploy (GitHub Pages)
+
+```bash
+npm run deploy
+```
+
+## Játékok és irányítás
+
+### 1) Brick Breaker
+
+**Módok**
+- Classic: az összes téglát ki kell ütni.
+- Endless: a kiürült sorok visszatöltődnek, a játék életekig tart.
+
+**Irányítás**
+- `A` / `←`: balra
+- `D` / `→`: jobbra
+- `SPACE` / `ESC`: pause / resume
+
+**Megjegyzés**
+- A fehér keretes téglák extra labdát spawnolhatnak.
+
+### 2) Cyber Snake
+
+**Irányítás**
+- `W` / `↑`: fel
+- `A` / `←`: bal
+- `S` / `↓`: le
+- `D` / `→`: jobb
+- `SPACE` / `ESC`: pause / resume
+
+**Szabályok**
+- Kajaevéssel nő a kígyó.
+- Minden 5. kaja után gyorsul.
+- Kajapontok: 5 / 10 / 20.
+
+### 3) Neon Pong
+
+**Módok**
+- 1 Player (AI ellen)
+- 1v1 (két játékos)
+
+**Irányítás**
+- `W` / `↑`: fel
+- `S` / `↓`: le
+- `SPACE` / `ESC`: pause / resume
+
+**Szabály**
+- 7 pontig tart a meccs.
+
+### 4) Cosmic Invaders
+
+**Módok**
+- Classic
+- Endless
+
+**Irányítás**
+- `A/D` vagy `←/→`: mozgás
+- `W/↑`: lövés
+- `SPACE` / `ESC`: pause / resume
+
+**Pontozás**
+- Zöld alien: 5 pont
+- Lila alien: 10 pont
+
+### 5) Neon Blocks
+
+**Irányítás**
+- `A/D` vagy `←/→`: mozgatás
+- `W/↑`: forgatás
+- `S/↓`: soft drop
+- `SPACE` / `ESC`: pause / resume
+
+**Szabályok**
+- 15×23-as rács.
+- Pentomino (5 cellás) elemek.
+- Teli sor törlés, kombó pontozás.
+- Minden 5 törölt sor után szintlépés és gyorsulás.
+
+## Projektstruktúra
+
+```text
 mini-arcade/
 ├── public/
 ├── src/
 │   ├── App.vue
 │   ├── main.js
 │   ├── style.css
-│   ├── assets/
 │   └── components/
 │       ├── ArcadeMenu.vue
 │       ├── ArcadeMenu.css
 │       ├── brickbreaker/
 │       │   ├── WelcomeScreen.vue
 │       │   ├── GameCanvas.vue
-│       │   ├── GameCanvasEndless.vue
-│       │   └── *.css
-│       └── snake/
-│           ├── WelcomeScreen.vue
-│           ├── GameCanvas.vue
-│           └── *.css
+│       │   └── GameCanvasEndless.vue
+│       ├── snake/
+│       │   ├── WelcomeScreen.vue
+│       │   └── GameCanvas.vue
+│       ├── pong/
+│       │   ├── WelcomeScreen.vue
+│       │   └── GameCanvas.vue
+│       ├── invaders/
+│       │   ├── WelcomeScreen.vue
+│       │   └── GameCanvas.vue
+│       └── blocks/
+│           ├── Welcomescreen.vue
+│           └── GameCanvas.vue
 ├── index.html
 ├── vite.config.js
 └── package.json
 ```
 
-## Getting Started
+## Fontos fájlok
 
-### 1) Install dependencies
-```bash
-npm install
-```
+- `src/App.vue`: képernyőváltás, játék state-ek, módválasztás
+- `src/components/ArcadeMenu.vue`: főmenü és játékindítás
+- `src/components/*/GameCanvas*.vue`: játéklogika + Canvas render
 
-### 2) Run in development
-This project currently has no `dev` script in `package.json`, so run Vite directly:
+## Ismert megjegyzések
 
-```bash
-npx vite
-```
-
-### 3) Build for production
-```bash
-npm run build
-```
-
-### 4) Deploy (GitHub Pages)
-```bash
-npm run deploy
-```
-
-## Notes
-- Main game routing is handled in `src/App.vue`.
-- The arcade menu is in `src/components/ArcadeMenu.vue`.
-- Brick Breaker and Snake game logic are in their respective `GameCanvas.vue` files.
+- A projekt több helyen canvas + key event kombinációt használ, ezért böngészőfókusz esetén az input viselkedése eltérhet.
+- A `blocks` welcome komponens fájlneve jelenleg `Welcomescreen.vue`; case-sensitive rendszeren érdemes a hivatkozásoknál erre figyelni.
