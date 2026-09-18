@@ -253,3 +253,107 @@
   0%, 100% { box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
   50%       { box-shadow: 0 0 30px rgba(0, 240, 255, 0.7); }
 }
+
+/* ── Responsive ─────────────────────────────────────────────── */
+
+/* The screen scrolls when its content is taller than the viewport
+   (small phones, landscape). Background layers stay pinned. */
+.welcome-screen {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.welcome-screen::after,
+.welcome-screen__grid {
+  position: fixed;
+}
+
+.welcome-screen__content {
+  margin: auto;
+  padding: 28px 24px;
+}
+
+.welcome-screen__start-btn {
+  touch-action: manipulation;
+}
+
+@media (max-width: 600px) {
+  .welcome-screen__content {
+    gap: 26px;
+    padding: 20px 14px;
+  }
+
+  .welcome-screen__title {
+    font-size: clamp(1.25rem, 8vw, 2rem);
+    letter-spacing: 1px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .welcome-screen__subtitle {
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+  }
+
+  .welcome-screen__how-to-play {
+    padding: 22px 16px;
+  }
+
+  .welcome-screen__section-title {
+    margin-bottom: 16px;
+  }
+
+  .welcome-screen__instructions {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .welcome-screen__rules {
+    padding-top: 18px;
+  }
+
+  .welcome-screen__rule {
+    gap: 10px;
+    font-size: 0.8rem;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .welcome-screen__scoring-row,
+  .welcome-screen__scoring-grid {
+    gap: 10px;
+  }
+
+  .welcome-screen__start-btn {
+    padding: 16px 20px;
+  }
+
+  .welcome-screen__btn-text {
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+  }
+}
+
+/* short screens (landscape phones): tighten vertical spacing */
+@media (max-height: 560px) {
+  .welcome-screen__content {
+    gap: 18px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .welcome-screen__how-to-play {
+    padding: 18px 20px;
+  }
+
+  .welcome-screen__instructions {
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+
+  .welcome-screen__rules {
+    padding-top: 14px;
+    gap: 8px;
+  }
+}

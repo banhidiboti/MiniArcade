@@ -1,7 +1,16 @@
 <template>
-  <div class="screen">
-    <div class="canvas-wrapper">
-      <canvas ref="canvasRef" :width="WIDTH" :height="HEIGHT"></canvas>
+  <div class="screen" :class="{ 'screen--side': sideBar }">
+    <div class="canvas-wrapper" :style="{ width: displayWidth + 'px', height: displayHeight + 'px' }">
+      <canvas
+        ref="canvasRef"
+        :width="WIDTH"
+        :height="HEIGHT"
+        :style="{ width: displayWidth + 'px', height: displayHeight + 'px' }"
+        @pointerdown="onPointerDown"
+        @pointermove="onPointerMove"
+        @pointerup="onPointerEnd"
+        @pointercancel="onPointerEnd"
+      ></canvas>
 
       <div v-if="state === 'paused'" class="overlay">
         <div class="panel panel--pause">
@@ -21,6 +30,7 @@
           <div class="panel-icon">🚀</div>
           <h1>MISSION COMPLETE</h1>
           <p class="final-score">{{ finalScore }}</p>
+          <ScoreSubmit :game="boardId" :score="finalScore" />
           <div class="btn-group">
             <button class="btn" @click="startGame">PLAY AGAIN</button>
             <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -33,6 +43,7 @@
           <div class="panel-icon">💀</div>
           <h1>GAME OVER</h1>
           <p class="final-score">{{ finalScore }}</p>
+          <ScoreSubmit :game="boardId" :score="finalScore" />
           <div class="btn-group">
             <button class="btn" @click="startGame">RETRY</button>
             <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -40,12 +51,25 @@
         </div>
       </div>
     </div>
+
+    <TouchBar v-if="touch" :side="sideBar">
+      <TouchButton label="Left" @press="keyState.left = true" @release="keyState.left = false">◀</TouchButton>
+      <TouchButton label="Right" @press="keyState.right = true" @release="keyState.right = false">▶</TouchButton>
+      <TouchButton wide accent label="Fire" @press="keyState.shoot = true" @release="keyState.shoot = false">FIRE</TouchButton>
+      <TouchButton label="Pause" @press="togglePause">❚❚</TouchButton>
+    </TouchBar>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import './GameCanvas.css'
+import TouchBar from '../shared/TouchBar.vue'
+import TouchButton from '../shared/TouchButton.vue'
+import ScoreSubmit from '../shared/ScoreSubmit.vue'
+import { useViewport } from '../../composables/useViewport.js'
+
+const { touch, sideBar, avail, fit } = useViewport()
 
 const props = defineProps({
   mode: {
@@ -57,10 +81,24 @@ const props = defineProps({
 defineEmits(['menu'])
 
 const isEndless = computed(() => props.mode === 'endless')
+const boardId = computed(() => (isEndless.value ? 'invaders-endless' : 'invaders-classic'))
 
 const WIDTH = 640
 const HEIGHT = 720
 const HUD_HEIGHT = 56
+
+// The game runs at WIDTH x HEIGHT; the canvas is scaled with CSS to fit the screen.
+const displayWidth = ref(WIDTH)
+const displayHeight = ref(HEIGHT)
+
+function computeSize() {
+  const scale = touch.value ? fit(WIDTH, HEIGHT) : Math.min(fit(WIDTH, HEIGHT) * 0.94, 1.2)
+  displayWidth.value = Math.max(1, Math.floor(WIDTH * scale))
+  displayHeight.value = Math.max(1, Math.floor(HEIGHT * scale))
+}
+
+watch([avail, touch], computeSize)
+computeSize()
 
 const state = ref('running')
 const score = ref(0)
@@ -212,6 +250,33 @@ function onKeyDown(event) {
     event.preventDefault()
     togglePause()
   }
+}
+
+// drag on the canvas: the ship follows the finger horizontally
+let dragPointer = null
+
+function moveShipTo(event) {
+  const rect = canvasRef.value.getBoundingClientRect()
+  const x = (event.clientX - rect.left) * (WIDTH / rect.width)
+  player.x = clamp(x - player.width / 2, 12, WIDTH - player.width - 12)
+}
+
+function onPointerDown(event) {
+  if (event.pointerType === 'mouse' || state.value !== 'running') return
+  dragPointer = event.pointerId
+  canvasRef.value.setPointerCapture?.(event.pointerId)
+  moveShipTo(event)
+}
+
+function onPointerMove(event) {
+  if (dragPointer !== event.pointerId || state.value !== 'running') return
+  moveShipTo(event)
+}
+
+function onPointerEnd(event) {
+  if (dragPointer !== event.pointerId) return
+  dragPointer = null
+  canvasRef.value?.releasePointerCapture?.(event.pointerId)
 }
 
 function onKeyUp(event) {

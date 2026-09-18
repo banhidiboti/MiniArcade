@@ -6,15 +6,15 @@
   inset: 0;
   background: #04040f;
   display: flex;
-  align-items: center;
-  justify-content: center;
   font-family: 'Press Start 2P', monospace;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto; /* small screens: the menu scrolls instead of being cut off */
+  -webkit-overflow-scrolling: touch;
 }
 
 .arcade-root::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background-image:
     linear-gradient(rgba(0, 120, 255, 0.07) 1px, transparent 1px),
@@ -26,7 +26,7 @@
 }
 
 .runner-layer {
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 1;
@@ -119,6 +119,7 @@
   gap: 36px;
   width: 100%;
   max-width: 860px;
+  margin: auto; /* centres when there is room, scrolls when there is not */
   padding: 24px 20px;
 }
 
@@ -802,4 +803,105 @@
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
+}
+
+/* ─── Leaderboard button ─────────────────────── */
+.leaderboard-btn {
+  padding: 16px 28px;
+  border: 2px solid #ffe600;
+  border-radius: 10px;
+  background: rgba(255, 230, 0, 0.05);
+  color: #ffe600;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.leaderboard-btn:hover {
+  background: rgba(255, 230, 0, 0.14);
+  box-shadow: 0 0 18px rgba(255, 230, 0, 0.35);
+  transform: translateY(-2px);
+}
+
+.leaderboard-btn__icon {
+  margin-right: 6px;
+}
+
+/* ─── Responsive ─────────────────────────────── */
+
+/* odd last card in a 2-column grid: centre it instead of leaving a hole */
+@media (max-width: 980px) and (min-width: 601px) {
+  .game-grid > .game-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 14px);
+  }
+}
+
+@media (max-width: 600px) {
+  .arcade-wrap {
+    gap: 22px;
+    padding: 18px 14px 28px;
+  }
+
+  .arcade-header { gap: 10px; }
+  .subtitle { font-size: 8px; letter-spacing: 4px; }
+  .title-gap { width: 10px; }
+
+  .game-grid { gap: 14px; }
+
+  .leaderboard-btn { width: 100%; font-size: 10px; padding: 15px 12px; }
+}
+
+/* compact horizontal cards (phones, and landscape phones): preview left, info right */
+@media (max-width: 600px), (max-height: 520px) and (orientation: landscape) {
+  .game-card { flex-direction: row; align-items: stretch; text-align: left; }
+  .game-card:hover { transform: none; }
+
+  .card-screen {
+    flex: 0 0 148px;
+    height: auto;
+    min-height: 124px;
+    border-bottom: 0;
+    border-right: 2px solid #1a2a3a;
+  }
+
+  .card-info {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    padding: 12px 14px;
+    gap: 6px;
+  }
+
+  .card-title { font-size: 12px; }
+  .card-desc { font-size: 11px; }
+}
+
+@media (max-width: 360px) {
+  .card-screen { flex-basis: 132px; }
+  .card-title { font-size: 11px; letter-spacing: 0; }
+}
+
+/* short landscape phones: keep the header compact */
+@media (max-height: 520px) and (orientation: landscape) {
+  .arcade-wrap { gap: 16px; padding-top: 12px; padding-bottom: 16px; }
+  .arcade-title { font-size: clamp(18px, 4vw, 30px); }
+  .game-grid { gap: 14px; }
+}
+
+/* touch devices have no hover */
+@media (hover: none) {
+  .game-card:hover { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-root::before,
+  .scanlines,
+  .vignette,
+  .runner-line,
+  .title-pixel,
+  .arcade-title { animation: none; }
 }

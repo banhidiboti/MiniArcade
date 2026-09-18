@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import ArcadeMenu from './components/ArcadeMenu.vue'
+import Leaderboard from './components/Leaderboard.vue'
 
 // Brick Breaker components
 import BrickWelcome from './components/brickbreaker/WelcomeScreen.vue'
@@ -81,6 +82,13 @@ const goToArcade = () => {
     @play-pong="screen = 'pong'"
     @play-invaders="screen = 'invaders'"
     @play-blocks="screen = 'blocks'"
+    @show-leaderboard="screen = 'leaderboard'"
+  />
+
+  <!-- LEADERBOARD -->
+  <Leaderboard
+    v-else-if="screen === 'leaderboard'"
+    @back="goToArcade"
   />
 
   <!-- BRICK BREAKER -->
@@ -166,8 +174,15 @@ const goToArcade = () => {
   box-sizing: border-box;
 }
 
+html,
 body {
   background: #000;
   overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+button {
+  touch-action: manipulation;
 }
 </style>

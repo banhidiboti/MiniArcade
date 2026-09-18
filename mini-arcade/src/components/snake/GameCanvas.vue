@@ -1,8 +1,16 @@
 <template>
-  <div class="screen">
+  <div class="screen" :class="{ 'screen--side': sideBar }">
 
     <div class="canvas-wrapper">
-      <canvas ref="canvasRef" :width="CW" :height="CH" />
+      <canvas
+        ref="canvasRef"
+        :width="CW"
+        :height="CH"
+        @pointerdown="onSwipeStart"
+        @pointermove="onSwipeMove"
+        @pointerup="onSwipeEnd"
+        @pointercancel="onSwipeEnd"
+      />
 
 
       <!-- Pause overlay -->
@@ -29,6 +37,7 @@
             <h1>GAME OVER</h1>
             <p class="final-score-label">SCORE</p>
             <p class="final-score">{{ score }}</p>
+            <ScoreSubmit game="snake" :score="score" />
             <div class="btn-group">
               <button class="btn" @click="startGame">PLAY AGAIN</button>
               <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -38,18 +47,32 @@
       </Transition>
     </div>
 
+    <TouchBar v-if="touch" :side="sideBar">
+      <TouchButton label="Left" @press="queueTurn(DIRS.left)">◀</TouchButton>
+      <TouchButton label="Up" @press="queueTurn(DIRS.up)">▲</TouchButton>
+      <TouchButton label="Down" @press="queueTurn(DIRS.down)">▼</TouchButton>
+      <TouchButton label="Right" @press="queueTurn(DIRS.right)">▶</TouchButton>
+      <TouchButton accent label="Pause" @press="togglePause">❚❚</TouchButton>
+    </TouchBar>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import './GameCanvas.css'
+import TouchBar from '../shared/TouchBar.vue'
+import TouchButton from '../shared/TouchButton.vue'
+import ScoreSubmit from '../shared/ScoreSubmit.vue'
+import { useViewport } from '../../composables/useViewport.js'
+
+const { touch, sideBar, avail } = useViewport()
 
 // ── Grid config ────────────────────────────────────────────────────────────
 const HUD_H     = 52
 const COLS      = 25
 const ROWS      = 25
-const MIN_CELL  = 12
+const MIN_CELL  = 8
 const VIEWPORT_FILL = 0.88
 
 const BASE_MS   = 130
@@ -69,9 +92,14 @@ let CW = CELL * COLS
 let CH = HUD_H + CELL * ROWS
 
 function computeSize() {
+  // touch / narrow screens use every free pixel (the control bar is already subtracted);
+  // desktop keeps a little breathing room around the board
+  const fill = touch.value ? 1 : VIEWPORT_FILL
+  const boxW = touch.value ? avail.value.w : window.innerWidth
+  const boxH = touch.value ? avail.value.h : window.innerHeight
   const nextCell = Math.max(
     MIN_CELL,
-    Math.floor(Math.min((window.innerWidth * VIEWPORT_FILL) / COLS, ((window.innerHeight - HUD_H) * VIEWPORT_FILL) / ROWS))
+    Math.floor(Math.min((boxW * fill) / COLS, ((boxH - HUD_H) * fill) / ROWS))
   )
 
   CELL = nextCell
@@ -213,6 +241,42 @@ const KEY_MAP = {
   ArrowRight: { x:  1, y: 0 }, d: { x:  1, y: 0 }, D: { x:  1, y: 0 },
 }
 
+const DIRS = {
+  up:    { x: 0, y: -1 },
+  down:  { x: 0, y:  1 },
+  left:  { x: -1, y: 0 },
+  right: { x:  1, y: 0 },
+}
+
+function queueTurn(nd) {
+  const lastQueued = turnQueue.length ? turnQueue[turnQueue.length - 1] : nextDir
+  if (isSameDir(nd, lastQueued)) return
+  if (isReverseDir(nd, lastQueued)) return
+  if (turnQueue.length < 2) turnQueue.push(nd)
+}
+
+// swipe on the canvas
+const SWIPE_MIN = 22
+let swipe = null
+
+function onSwipeStart(e) {
+  swipe = { id: e.pointerId, x: e.clientX, y: e.clientY }
+}
+
+function onSwipeMove(e) {
+  if (!swipe || swipe.id !== e.pointerId) return
+  const dx = e.clientX - swipe.x
+  const dy = e.clientY - swipe.y
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN) return
+  queueTurn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? DIRS.right : DIRS.left) : (dy > 0 ? DIRS.down : DIRS.up))
+  swipe.x = e.clientX
+  swipe.y = e.clientY
+}
+
+function onSwipeEnd() {
+  swipe = null
+}
+
 function isSameDir(a, b) {
   return a.x === b.x && a.y === b.y
 }
@@ -224,11 +288,7 @@ function isReverseDir(a, b) {
 function onKey(e) {
   if (KEY_MAP[e.key]) {
     e.preventDefault()
-    const nd = KEY_MAP[e.key]
-    const lastQueued = turnQueue.length ? turnQueue[turnQueue.length - 1] : nextDir
-    if (isSameDir(nd, lastQueued)) return
-    if (isReverseDir(nd, lastQueued)) return
-    if (turnQueue.length < 2) turnQueue.push(nd)
+    queueTurn(KEY_MAP[e.key])
   }
   if (e.key === ' ' || e.key === 'Escape') { e.preventDefault(); togglePause() }
 }
@@ -446,19 +506,18 @@ function drawParticles(ctx) {
 }
 
 // ── Lifecycle ──────────────────────────────────────────────────────────────
-const onResize = () => computeSize()
+// re-fit whenever the window, orientation or control bar changes
+watch([avail, touch], computeSize)
 
 onMounted(() => {
   computeSize()
   startGame()
   window.addEventListener('keydown', onKey)
-  window.addEventListener('resize', onResize)
   frameId = requestAnimationFrame(render)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKey)
-  window.removeEventListener('resize', onResize)
   cancelAnimationFrame(frameId)
 })
 </script>

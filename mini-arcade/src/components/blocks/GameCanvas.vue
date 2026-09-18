@@ -1,7 +1,12 @@
 <template>
-  <div class="screen">
-    <div class="canvas-wrapper">
-      <canvas ref="canvasRef" :width="WIDTH" :height="HEIGHT"></canvas>
+  <div class="screen" :class="{ 'screen--side': sideBar }">
+    <div class="canvas-wrapper" :style="{ width: displayWidth + 'px', height: displayHeight + 'px' }">
+      <canvas
+        ref="canvasRef"
+        :width="WIDTH"
+        :height="HEIGHT"
+        :style="{ width: displayWidth + 'px', height: displayHeight + 'px' }"
+      ></canvas>
 
       <div v-if="gameState === 'paused'" class="overlay">
         <div class="panel panel--pause">
@@ -19,6 +24,7 @@
         <div class="panel panel--lose">
           <h1>GRID LOCK</h1>
           <p class="panel-score">{{ score }}</p>
+          <ScoreSubmit game="blocks" :score="score" />
           <div class="btn-group">
             <button class="btn" @click="startGame">PLAY AGAIN</button>
             <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -26,12 +32,26 @@
         </div>
       </div>
     </div>
+
+    <TouchBar v-if="touch" :side="sideBar">
+      <TouchButton label="Left" @press="touchMove(-1)" @release="keyState.left = false">◀</TouchButton>
+      <TouchButton label="Right" @press="touchMove(1)" @release="keyState.right = false">▶</TouchButton>
+      <TouchButton accent label="Rotate" @press="rotatePiece">⟳</TouchButton>
+      <TouchButton label="Drop" @press="touchSoftDrop" @release="releaseSoftDrop">▼</TouchButton>
+      <TouchButton accent label="Pause" @press="togglePause">❚❚</TouchButton>
+    </TouchBar>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import './GameCanvas.css'
+import TouchBar from '../shared/TouchBar.vue'
+import TouchButton from '../shared/TouchButton.vue'
+import ScoreSubmit from '../shared/ScoreSubmit.vue'
+import { useViewport } from '../../composables/useViewport.js'
+
+const { touch, sideBar, avail, fit } = useViewport()
 
 defineEmits(['menu'])
 
@@ -43,6 +63,19 @@ const BOARD_WIDTH = COLS * CELL
 const BOARD_HEIGHT = ROWS * CELL
 const WIDTH = BOARD_WIDTH
 const HEIGHT = HUD_HEIGHT + BOARD_HEIGHT
+
+// The game runs at WIDTH x HEIGHT; the canvas is scaled with CSS to fit the screen.
+const displayWidth = ref(WIDTH)
+const displayHeight = ref(HEIGHT)
+
+function computeSize() {
+  const scale = touch.value ? fit(WIDTH, HEIGHT) : Math.min(fit(WIDTH, HEIGHT) * 0.92, 900 / HEIGHT)
+  displayWidth.value = Math.max(1, Math.floor(WIDTH * scale))
+  displayHeight.value = Math.max(1, Math.floor(HEIGHT * scale))
+}
+
+watch([avail, touch], computeSize)
+computeSize()
 
 const COLORS = ['#ff4466', '#ff7733', '#44ff88', '#44ccff', '#bb66ff']
 const SOFT_DROP_SPEED_MULTIPLIER = 4
@@ -665,6 +698,26 @@ function togglePause() {
 
 function resumeGame() {
   if (gameState.value === 'paused') gameState.value = 'running'
+}
+
+// on-screen buttons
+function touchMove(dx) {
+  if (gameState.value !== 'running') return
+  keyState.left = dx < 0
+  keyState.right = dx > 0
+  moveTimer = 0 // hold-to-repeat starts after the normal delay
+  movePiece(dx, 0)
+}
+
+function touchSoftDrop() {
+  if (requireSoftDropRelease) return
+  keyState.down = true
+  if (gameState.value === 'running') movePiece(0, 1)
+}
+
+function releaseSoftDrop() {
+  keyState.down = false
+  requireSoftDropRelease = false
 }
 
 function onKeyDown(event) {

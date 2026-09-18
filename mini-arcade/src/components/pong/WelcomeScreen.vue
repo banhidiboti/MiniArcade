@@ -50,6 +50,8 @@
         </div>
       </div>
 
+      <TopThree :boards="[{ id: 'pong' }]" />
+
       <div class="welcome-screen__start-actions">
         <button class="welcome-screen__start-btn" @click="$emit('start', 'single')">
           <div class="welcome-screen__btn-glow" />
@@ -70,6 +72,7 @@
 </template>
 
 <script setup>
+import TopThree from '../shared/TopThree.vue'
 defineEmits(['start', 'back'])
 </script>
 

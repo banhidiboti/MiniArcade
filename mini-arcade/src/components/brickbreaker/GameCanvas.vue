@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import ScoreSubmit from '../shared/ScoreSubmit.vue'
 
 const props = defineProps({
   mode: {
@@ -10,6 +11,7 @@ const props = defineProps({
 
 const emit = defineEmits(['goHome'])
 const isEndlessMode = computed(() => props.mode === 'endless')
+const boardId = computed(() => (isEndlessMode.value ? 'brickbreaker-endless' : 'brickbreaker-classic'))
 const resumeGame = () => { paused.value = false }
 const togglePause = () => {
   if (!gameOver.value && !won.value) paused.value = !paused.value
@@ -68,15 +70,8 @@ const getGameCoordsFromPointer = (event) => {
 const onPointerDown = (event) => {
   if (gameOver.value || won.value) return
 
-  const { x, y } = getGameCoordsFromPointer(event)
+  const { x } = getGameCoordsFromPointer(event)
   const p = paddle.value
-  const isOnPaddle =
-    x >= p.x &&
-    x <= p.x + p.width &&
-    y >= p.y - 10 &&
-    y <= p.y + p.height + 10
-
-  if (!isOnPaddle) return
 
   draggingPaddle = true
   activePointerId = event.pointerId
@@ -634,6 +629,7 @@ onUnmounted(() => {
             <h1>{{ won ? 'YOU WIN!' : 'GAME OVER' }}</h1>
             <p class="final-score">{{ finalScore }} points</p>
             <p v-if="won && lives > 1" class="score-bonus">{{ score }} × {{ lives }} life bonus! 🎯</p>
+            <ScoreSubmit :game="boardId" :score="finalScore" />
             <div class="btn-group">
               <button class="btn" @click="initGame">New Game</button>
               <button class="btn btn--secondary" @click="goHome">Main Menu</button>

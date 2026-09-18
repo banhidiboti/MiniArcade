@@ -1,8 +1,17 @@
 <template>
-  <div class="screen">
+  <div class="screen" :class="{ 'screen--side': sideBar }">
 
-    <div class="canvas-wrapper">
-      <canvas ref="canvasRef" :width="CW" :height="CH" />
+    <div class="canvas-wrapper" :style="{ width: displayWidth + 'px', height: displayHeight + 'px' }">
+      <canvas
+        ref="canvasRef"
+        :width="CW"
+        :height="CH"
+        :style="{ width: displayWidth + 'px', height: displayHeight + 'px' }"
+        @pointerdown="onPointerDown"
+        @pointermove="onPointerMove"
+        @pointerup="onPointerEnd"
+        @pointercancel="onPointerEnd"
+      />
 
 
       <!-- Pause overlay -->
@@ -31,6 +40,7 @@
             <p class="final-score">{{ winnerText }}</p>
             <p class="final-score-label">FINAL SCORE</p>
             <p class="final-score">{{ playerScore }} - {{ aiScore }}</p>
+            <ScoreSubmit v-if="isVersusAi" game="pong" :score="rankPoints" show-score />
             <div class="btn-group">
               <button class="btn" @click="startGame">PLAY AGAIN</button>
               <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -40,12 +50,24 @@
       </Transition>
     </div>
 
+    <TouchBar v-if="touch" :side="sideBar">
+      <TouchButton accent wide label="Pause" @press="togglePause">❚❚ PAUSE</TouchButton>
+      <span v-if="!sideBar && displayWidth < 520" class="touch-hint">DRAG TO MOVE · TIP: ROTATE YOUR PHONE</span>
+      <span v-else class="touch-hint">DRAG {{ isVersusAi ? 'ANYWHERE' : 'YOUR SIDE' }} TO MOVE</span>
+    </TouchBar>
+
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import './GameCanvas.css'
+import TouchBar from '../shared/TouchBar.vue'
+import TouchButton from '../shared/TouchButton.vue'
+import ScoreSubmit from '../shared/ScoreSubmit.vue'
+import { useViewport } from '../../composables/useViewport.js'
+
+const { touch, sideBar, avail, fit } = useViewport()
 
 const props = defineProps({
   mode: {
@@ -62,28 +84,24 @@ const BASE_H = 540
 const WIN_SCORE = 7
 const MAX_BOUNCE_ANGLE = Math.PI / 3
 
-let CW = BASE_W
-let CH = BASE_H
-let playH = CH - HUD_H
+// The game always runs at BASE_W x BASE_H; the canvas is scaled with CSS to fit the screen.
+const CW = BASE_W
+const CH = BASE_H
+const playH = CH - HUD_H
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
 
+const displayWidth = ref(BASE_W)
+const displayHeight = ref(BASE_H)
+let hudScale = 1
+
 function computeSize() {
-  const maxW = Math.max(560, Math.floor(window.innerWidth * 0.9))
-  const maxH = Math.max(360, Math.floor(window.innerHeight * 0.85))
-  const scale = Math.min(maxW / BASE_W, maxH / BASE_H)
-
-  CW = Math.floor(BASE_W * scale)
-  CH = Math.floor(BASE_H * scale)
-  playH = CH - HUD_H
-
-  const canvas = canvasRef.value
-  if (canvas) {
-    canvas.width = CW
-    canvas.height = CH
-  }
-
-  resetObjects()
+  // desktop keeps a margin around the field, touch screens use all the free space
+  const scale = touch.value ? fit(BASE_W, BASE_H) : Math.min(fit(BASE_W, BASE_H) * 0.94, 1.6)
+  displayWidth.value = Math.max(1, Math.floor(BASE_W * scale))
+  displayHeight.value = Math.max(1, Math.floor(BASE_H * scale))
+  // keep the HUD text readable when the field is scaled down a lot
+  hudScale = clamp(0.62 / scale, 1, 2.2)
 }
 
 defineEmits(['menu'])
@@ -94,6 +112,13 @@ const playerScore = ref(0)
 const aiScore = ref(0)
 const winnerText = ref('')
 const rightLabel = computed(() => (isVersusAi.value ? 'CPU' : 'P2'))
+
+// Leaderboard points for a match against the CPU:
+// a win is worth 1000 plus 100 per point of margin, a loss 100 per point scored.
+const rankPoints = computed(() => {
+  if (playerScore.value >= WIN_SCORE) return 1000 + (WIN_SCORE - aiScore.value) * 100
+  return playerScore.value * 100
+})
 
 const paddle = {
   width: 14,
@@ -206,6 +231,41 @@ function onKeyDown(e) {
   }
 }
 
+// touch / mouse drag: the paddle follows the finger.
+// Against the CPU any touch moves your paddle; in 2-player mode each half of the field owns a paddle.
+const pointers = new Map()
+
+function pointerTarget(x) {
+  return !isVersusAi.value && x > CW / 2 ? ai : paddle
+}
+
+function moveWithPointer(e, target) {
+  const rect = canvasRef.value.getBoundingClientRect()
+  const y = (e.clientY - rect.top) * (CH / rect.height)
+  target.y = clamp(y - target.height / 2, HUD_H, CH - target.height)
+}
+
+function onPointerDown(e) {
+  if (gameState.value !== 'running') return
+  const rect = canvasRef.value.getBoundingClientRect()
+  const x = (e.clientX - rect.left) * (CW / rect.width)
+  const target = pointerTarget(x)
+  pointers.set(e.pointerId, target)
+  canvasRef.value.setPointerCapture?.(e.pointerId)
+  moveWithPointer(e, target)
+}
+
+function onPointerMove(e) {
+  const target = pointers.get(e.pointerId)
+  if (!target || gameState.value !== 'running') return
+  moveWithPointer(e, target)
+}
+
+function onPointerEnd(e) {
+  pointers.delete(e.pointerId)
+  canvasRef.value?.releasePointerCapture?.(e.pointerId)
+}
+
 function onKeyUp(e) {
   if (e.key === 'w' || e.key === 'W') keys.leftUp = false
   if (e.key === 's' || e.key === 'S') keys.leftDown = false
@@ -307,18 +367,20 @@ function drawHUD(ctx) {
   ctx.fillStyle = 'rgba(2, 20, 48, 0.62)'
   ctx.fillRect(0, 0, CW, HUD_H)
 
+  const fontPx = Math.round(12 * hudScale)
+  const baseline = HUD_H / 2 + fontPx * 0.58
   ctx.textAlign = 'left'
-  ctx.font = "12px 'Press Start 2P'"
+  ctx.font = `${fontPx}px 'Press Start 2P'`
   ctx.fillStyle = 'rgba(0, 240, 255, 0.58)'
-  ctx.fillText('PLAYER', 16, HUD_H / 2 + 7)
+  ctx.fillText('PLAYER', 16, baseline)
 
   ctx.textAlign = 'right'
   ctx.fillStyle = 'rgba(255, 150, 220, 0.58)'
-  ctx.fillText(rightLabel.value, CW - 16, HUD_H / 2 + 7)
+  ctx.fillText(rightLabel.value, CW - 16, baseline)
 
   ctx.textAlign = 'center'
   ctx.fillStyle = '#00f0ff'
-  ctx.fillText(`${playerScore.value}  :  ${aiScore.value}`, CW / 2, HUD_H / 2 + 7)
+  ctx.fillText(`${playerScore.value}  :  ${aiScore.value}`, CW / 2, baseline)
   ctx.restore()
 }
 
@@ -389,25 +451,32 @@ function loop(time) {
   frameId = requestAnimationFrame(loop)
 }
 
-const onResize = () => computeSize()
+watch([avail, touch], computeSize)
+computeSize()
 
 onMounted(() => {
-  computeSize()
   startGame()
   window.addEventListener('keydown', onKeyDown)
   window.addEventListener('keyup', onKeyUp)
-  window.addEventListener('resize', onResize)
   frameId = requestAnimationFrame(loop)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('keyup', onKeyUp)
-  window.removeEventListener('resize', onResize)
   cancelAnimationFrame(frameId)
 })
 </script>
 
 <style scoped>
 /* all styles in GameCanvas.css */
+.touch-hint {
+  flex: 2 1 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  line-height: 1.7;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
 </style>
