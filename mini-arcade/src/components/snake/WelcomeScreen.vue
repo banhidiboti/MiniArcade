@@ -79,8 +79,6 @@
       </div>
 
       <!-- Start button -->
-      <TopThree :boards="[{ id: 'snake' }]" />
-
       <div class="welcome-screen__start-actions">
         <button class="welcome-screen__start-btn" @click="$emit('start')">
           <div class="welcome-screen__btn-glow" />
@@ -97,7 +95,6 @@
 </template>
 
 <script setup>
-import TopThree from '../shared/TopThree.vue'
 defineEmits(['start', 'back'])
 </script>
 

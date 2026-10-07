@@ -48,8 +48,6 @@
         </div>
       </div>
 
-      <TopThree :boards="[{ id: 'blocks' }]" />
-
       <div class="welcome-screen__start-actions">
         <button class="welcome-screen__start-btn" @click="$emit('start')">
           <span class="welcome-screen__btn-text">START NEON BLOCKS</span>
@@ -66,7 +64,6 @@
 </template>
 
 <script setup>
-import TopThree from '../shared/TopThree.vue'
 defineEmits(['start', 'back'])
 </script>
 

@@ -160,11 +160,6 @@
           </div>
         </button>
       </div>
-
-      <button class="leaderboard-btn" @click="$emit('show-leaderboard')">
-        <span class="leaderboard-btn__icon">🏆</span> LEADERBOARD
-      </button>
-
     </div>
   </div>
 </template>
@@ -172,7 +167,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
 
-defineEmits(['play-brickbreaker', 'play-snake', 'play-pong', 'play-invaders', 'play-blocks', 'show-leaderboard'])
+defineEmits(['play-brickbreaker', 'play-snake', 'play-pong', 'play-invaders', 'play-blocks'])
 
 const snakeCells = [
   { x: 2, y: 4, type: 'head' },

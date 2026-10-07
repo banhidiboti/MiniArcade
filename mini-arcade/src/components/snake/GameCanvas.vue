@@ -37,7 +37,6 @@
             <h1>GAME OVER</h1>
             <p class="final-score-label">SCORE</p>
             <p class="final-score">{{ score }}</p>
-            <ScoreSubmit game="snake" :score="score" />
             <div class="btn-group">
               <button class="btn" @click="startGame">PLAY AGAIN</button>
               <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -63,7 +62,6 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import './GameCanvas.css'
 import TouchBar from '../shared/TouchBar.vue'
 import TouchButton from '../shared/TouchButton.vue'
-import ScoreSubmit from '../shared/ScoreSubmit.vue'
 import { useViewport } from '../../composables/useViewport.js'
 
 const { touch, sideBar, avail } = useViewport()

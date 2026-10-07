@@ -24,7 +24,6 @@
         <div class="panel panel--lose">
           <h1>GRID LOCK</h1>
           <p class="panel-score">{{ score }}</p>
-          <ScoreSubmit game="blocks" :score="score" />
           <div class="btn-group">
             <button class="btn" @click="startGame">PLAY AGAIN</button>
             <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -48,7 +47,6 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import './GameCanvas.css'
 import TouchBar from '../shared/TouchBar.vue'
 import TouchButton from '../shared/TouchButton.vue'
-import ScoreSubmit from '../shared/ScoreSubmit.vue'
 import { useViewport } from '../../composables/useViewport.js'
 
 const { touch, sideBar, avail, fit } = useViewport()

@@ -40,7 +40,6 @@
             <p class="final-score">{{ winnerText }}</p>
             <p class="final-score-label">FINAL SCORE</p>
             <p class="final-score">{{ playerScore }} - {{ aiScore }}</p>
-            <ScoreSubmit v-if="isVersusAi" game="pong" :score="rankPoints" show-score />
             <div class="btn-group">
               <button class="btn" @click="startGame">PLAY AGAIN</button>
               <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -64,7 +63,6 @@ import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import './GameCanvas.css'
 import TouchBar from '../shared/TouchBar.vue'
 import TouchButton from '../shared/TouchButton.vue'
-import ScoreSubmit from '../shared/ScoreSubmit.vue'
 import { useViewport } from '../../composables/useViewport.js'
 
 const { touch, sideBar, avail, fit } = useViewport()
@@ -112,13 +110,6 @@ const playerScore = ref(0)
 const aiScore = ref(0)
 const winnerText = ref('')
 const rightLabel = computed(() => (isVersusAi.value ? 'CPU' : 'P2'))
-
-// Leaderboard points for a match against the CPU:
-// a win is worth 1000 plus 100 per point of margin, a loss 100 per point scored.
-const rankPoints = computed(() => {
-  if (playerScore.value >= WIN_SCORE) return 1000 + (WIN_SCORE - aiScore.value) * 100
-  return playerScore.value * 100
-})
 
 const paddle = {
   width: 14,

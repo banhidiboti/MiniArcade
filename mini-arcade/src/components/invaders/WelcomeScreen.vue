@@ -44,8 +44,6 @@
         </div>
       </div>
 
-      <TopThree :boards="[{ id: 'invaders-classic', label: 'CLASSIC' }, { id: 'invaders-endless', label: 'ENDLESS' }]" />
-
       <div class="welcome-screen__start-actions">
         <button class="welcome-screen__start-btn" @click="$emit('start', 'classic')">
           <span class="welcome-screen__btn-text">CLASSIC MODE</span>
@@ -67,7 +65,6 @@
 </template>
 
 <script setup>
-import TopThree from '../shared/TopThree.vue'
 defineEmits(['start', 'back'])
 </script>
 

@@ -1,5 +1,4 @@
 <script setup>
-import TopThree from '../shared/TopThree.vue'
 import './WelcomeScreen.css'
 
 const emit = defineEmits(['start', 'back'])
@@ -83,8 +82,6 @@ const BRICK_SCORING = [
           </div>
         </div>
       </div>
-
-      <TopThree :boards="[{ id: 'brickbreaker-classic', label: 'CLASSIC' }, { id: 'brickbreaker-endless', label: 'ENDLESS' }]" />
 
       <div class="welcome-screen__start-actions">
         <button class="welcome-screen__start-btn" @click="startGame('classic')">

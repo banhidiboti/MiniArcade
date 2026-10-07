@@ -30,7 +30,6 @@
           <div class="panel-icon">🚀</div>
           <h1>MISSION COMPLETE</h1>
           <p class="final-score">{{ finalScore }}</p>
-          <ScoreSubmit :game="boardId" :score="finalScore" />
           <div class="btn-group">
             <button class="btn" @click="startGame">PLAY AGAIN</button>
             <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -43,7 +42,6 @@
           <div class="panel-icon">💀</div>
           <h1>GAME OVER</h1>
           <p class="final-score">{{ finalScore }}</p>
-          <ScoreSubmit :game="boardId" :score="finalScore" />
           <div class="btn-group">
             <button class="btn" @click="startGame">RETRY</button>
             <button class="btn" @click="$emit('menu')">MAIN MENU</button>
@@ -66,7 +64,6 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import './GameCanvas.css'
 import TouchBar from '../shared/TouchBar.vue'
 import TouchButton from '../shared/TouchButton.vue'
-import ScoreSubmit from '../shared/ScoreSubmit.vue'
 import { useViewport } from '../../composables/useViewport.js'
 
 const { touch, sideBar, avail, fit } = useViewport()
@@ -81,7 +78,6 @@ const props = defineProps({
 defineEmits(['menu'])
 
 const isEndless = computed(() => props.mode === 'endless')
-const boardId = computed(() => (isEndless.value ? 'invaders-endless' : 'invaders-classic'))
 
 const WIDTH = 640
 const HEIGHT = 720
